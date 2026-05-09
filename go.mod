@@ -6,6 +6,7 @@ require (
 	dario.cat/mergo v1.0.2
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v1.15.0
+	github.com/crossplane-contrib/xprin v0.2.0
 	github.com/crossplane/crossplane-runtime/v2 v2.2.1
 	github.com/crossplane/crossplane/v2 v2.2.1
 	github.com/docker/docker v28.5.2+incompatible
@@ -72,7 +73,7 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.64.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.39.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
-	go.yaml.in/yaml/v2 v2.4.3 // indirect
+	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
 	golang.org/x/sync v0.20.0 // indirect
@@ -122,7 +123,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-isatty v0.0.21 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/moby/spdystream v0.5.1 // indirect
 	github.com/moby/term v0.5.2 // indirect
@@ -163,3 +164,5 @@ require (
 	k8s.io/kube-openapi v0.0.0-20260127142750-a19766b6e2d4 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 )
+
+replace github.com/crossplane-contrib/xprin => github.com/crossplane-contrib/xprin v0.2.1-0.20260509121724-b4294cc84e8b

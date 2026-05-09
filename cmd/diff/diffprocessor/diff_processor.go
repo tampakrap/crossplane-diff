@@ -18,11 +18,11 @@ import (
 	dt "github.com/crossplane-contrib/crossplane-diff/cmd/diff/renderer/types"
 	"github.com/crossplane-contrib/crossplane-diff/cmd/diff/serial"
 	"github.com/crossplane-contrib/crossplane-diff/cmd/diff/types"
+	"github.com/crossplane-contrib/xprin/cmd/xprin-helpers/claimtoxr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	un "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/uuid"
 
 	"github.com/crossplane/crossplane-runtime/v2/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
@@ -743,36 +743,16 @@ func (p *DefaultDiffProcessor) synthesizeDummyBackingXRForNewClaim(ctx context.C
 
 	// Extract XR kind from XRD
 	xrKind, _, _ := un.NestedString(xrd.Object, "spec", "names", "kind")
-	group, _, _ := un.NestedString(xrd.Object, "spec", "group")
 
-	// Create the dummy XR
-	dummyXR := cmp.New()
-	dummyXR.SetAPIVersion(group + "/" + claimGVK.Version)
-	dummyXR.SetKind(xrKind)
-	dummyXR.SetName(claim.GetName()) // Use claim name directly for cleaner diff output
-	dummyXR.SetUID(uuid.NewUUID())
-
-	// Set spec.claimRef - the key field that compositions need
-	claimRef := map[string]any{
-		"apiVersion": claim.GetAPIVersion(),
-		"kind":       claim.GetKind(),
-		"name":       claim.GetName(),
-		"namespace":  claim.GetNamespace(),
-	}
-	if err := un.SetNestedField(dummyXR.Object, claimRef, "spec", "claimRef"); err != nil {
-		return result, errors.Wrap(err, "cannot set claimRef on dummy backing XR")
-	}
-
-	// Merge claim's spec into XR's spec (preserving claimRef we just set)
-	claimSpec, hasSpec, _ := un.NestedFieldCopy(claim.Object, "spec")
-	if hasSpec && claimSpec != nil {
-		if claimSpecMap, ok := claimSpec.(map[string]any); ok {
-			for k, v := range claimSpecMap {
-				if err := un.SetNestedField(dummyXR.Object, v, "spec", k); err != nil {
-					p.config.Logger.Debug("Failed to set spec field on dummy XR", "field", k, "error", err)
-				}
-			}
-		}
+	// Use the shared xprin converter: claim name (no suffix), spec.claimRef set,
+	// claim-name/namespace labels added, fresh metadata.uid.
+	dummyXR, err := claimtoxr.ConvertClaimToXR(claim.GetUnstructured(), claimtoxr.Options{
+		Name:        claim.GetName(),
+		Kind:        xrKind,
+		GenerateUID: true,
+	})
+	if err != nil {
+		return result, errors.Wrap(err, "cannot convert claim to backing XR")
 	}
 
 	result.xrForRendering = dummyXR

@@ -7,6 +7,9 @@ output:
 linters:
   default: all
   disable:
+    # HACK
+    - gomoddirectives
+
     # These are linters we'd like to enable, but that will be labor intensive to
     # make existing code compliant.
     - wrapcheck
